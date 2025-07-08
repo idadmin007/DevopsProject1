@@ -8,7 +8,7 @@ pipeline {
     agent any
     // DECLARE THE VARIABLES HERE:
     environment {
-        DOCKER_USERNAME = "nasirpatel"     // check the 'ID' in your Jenkins credentials
+        DOCKER_USERNAME = "class01008"     // check the 'ID' in your Jenkins credentials
     }
 
     stages {
@@ -25,7 +25,7 @@ pipeline {
             steps {
                 dir ("DevopsProject1"){
                   script {
-                    git branch: 'main', url: 'https://github.com/pandacloud1/DevopsProject1.git' 
+                    git branch: 'main', url: 'https://github.com/idadmin007/DevopsProject1.git' 
                   }
                 }
             }
@@ -64,7 +64,7 @@ pipeline {
                 dir('DevopsProject1') {      // go to directory where 'Dockerfile' is stored
                     script {
                       def JOB = env.JOB_NAME.toLowerCase()           // Convert Jenkins Job name to lower-case
-                      sh "docker build -t ${JOB}:${BUILD_NUMBER} ."  // 'JOB_NAME' & 'BUILD_NUMBER' are Jenkins Global variable
+                      sh "podman build -t ${JOB}:${BUILD_NUMBER} ."  // 'JOB_NAME' & 'BUILD_NUMBER' are Jenkins Global variable
                     }
                 }
             }
@@ -76,8 +76,8 @@ pipeline {
                 dir('DevopsProject1') {      // go to directory where Docker Image is created
                   script {
                     def JOB = env.JOB_NAME.toLowerCase() // Convert Jenkins Job name to lower-case
-                    sh "docker tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
-                    sh "docker tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:latest"
+                    sh "podman tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
+                    sh "podman tag ${JOB}:${BUILD_NUMBER} ${DOCKER_USERNAME}/${JOB}:latest"
                   }
                 }
             } 
@@ -98,10 +98,10 @@ pipeline {
             steps{
                 script { 
                   withCredentials([usernamePassword(credentialsId: 'my_dockerhub_creds', usernameVariable: 'docker_user', passwordVariable: 'docker_pass')]) {
-                    sh "docker login -u '${docker_user}' -p '${docker_pass}'"
+                    sh "podman login -u '${docker_user}' -p '${docker_pass}'"
                     def JOB = env.JOB_NAME.toLowerCase() // Convert Jenkins Job name to lower-case
-                    sh "docker push ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_USERNAME}/${JOB}:latest"
+                    sh "podman push ${DOCKER_USERNAME}/${JOB}:v${BUILD_NUMBER}"
+                    sh "podman push ${DOCKER_USERNAME}/${JOB}:latest"
                   }
                 }
             }
@@ -111,9 +111,10 @@ pipeline {
             // Remove the unwanted (dangling) images created in Jenkins Server to free-up space
             steps{
                 script { 
-                  sh "docker image prune -af"
+                  sh "podman image prune -af"
                 }
             }
         }
     }
 }
+
